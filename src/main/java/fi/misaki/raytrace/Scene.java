@@ -1,11 +1,9 @@
 package fi.misaki.raytrace;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Objects;
 
-public class Scene1 extends JPanel {
+public class Scene {
 
     private static final Sphere[] SPHERES = {
             new Sphere(new Dot(0, -1, 3), 1, new Color(255, 0, 0)),
@@ -13,46 +11,50 @@ public class Scene1 extends JPanel {
             new Sphere(new Dot(-2, 0, 4), 1, new Color(0, 255, 0))
     };
 
-    private static final Color BACKGROUND_COLOR = Color.WHITE;
 
-    private static final Dimension CANVAS_DIMENSION = new Dimension(1024, 1024);
-    private static final Dimension VIEWPORT_DIMENSION = new Dimension(1, 1);
 
     private static final double PROJECTION_PLANE_DISTANCE = 1;
 
-    private static final Point CANVAS_MIN = new Point(-CANVAS_DIMENSION.width / 2, -CANVAS_DIMENSION.height / 2);
-    private static final Point CANVAS_MAX = new Point(CANVAS_DIMENSION.width / 2, CANVAS_DIMENSION.height / 2);
-    private BufferedImage doubleBuffer;
 
-    public Scene1() {
+    private final Color backgroundColor;
+    private final Dimension canvasDimension;
+    private final DoubleDimension viewportDimension;
+    private final Point canvasMin;
+    private final Point canvasMax;
+    private Dot camera;
+
+    public Scene(Color backgroundColor, Dimension canvasDimension) {
+        this.backgroundColor = backgroundColor;
+        this.canvasDimension = canvasDimension;
+        this.viewportDimension = new DoubleDimension(1, 1.0 * canvasDimension.height / canvasDimension.width);
+        canvasMin = new Point(-canvasDimension.width / 2, -canvasDimension.height / 2);
+        canvasMax = new Point(canvasDimension.width / 2, canvasDimension.height / 2);
         render();
     }
 
     private void putPixel(BufferedImage image, int x, int y, int color) {
-        int targetX = x - CANVAS_MIN.x;
-        int targetY = CANVAS_DIMENSION.height - (y - CANVAS_MIN.y) - 1;
+        int targetX = x - canvasMin.x;
+        int targetY = canvasDimension.height - (y - canvasMin.y) - 1;
         image.setRGB(targetX, targetY, color);
     }
 
-    private void render() {
-        BufferedImage image = new BufferedImage(CANVAS_DIMENSION.width, CANVAS_DIMENSION.height, BufferedImage.TYPE_INT_RGB);
-        Dot camera = new Dot(0, 0, 0);
-        for (int y = CANVAS_MIN.y; y < CANVAS_MAX.y; y++) {
-            for (int x = CANVAS_MIN.x; x < CANVAS_MAX.x; x++) {
+    public BufferedImage render() {
+        camera = new Dot(0, 0, 0);
+        BufferedImage image = new BufferedImage(canvasDimension.width, canvasDimension.height, BufferedImage.TYPE_INT_RGB);
+        for (int y = canvasMin.y; y < canvasMax.y; y++) {
+            for (int x = canvasMin.x; x < canvasMax.x; x++) {
                 Dot viewPort = canvasToViewPort(x, y);
                 Color color = traceRay(camera, viewPort, 1, Double.MAX_VALUE);
                 putPixel(image, x, y, color.getRGB());
             }
         }
-        this.doubleBuffer = image;
-
-        repaint();
+        return image;
     }
 
     private Dot canvasToViewPort(double x, double y) {
         return new Dot(
-                x * VIEWPORT_DIMENSION.width / CANVAS_DIMENSION.width,
-                y * VIEWPORT_DIMENSION.height / CANVAS_DIMENSION.height,
+                x * viewportDimension.width() / canvasDimension.width,
+                y * viewportDimension.height() / canvasDimension.height,
                 PROJECTION_PLANE_DISTANCE
         );
     }
@@ -70,7 +72,7 @@ public class Scene1 extends JPanel {
             }
         }
         if (closestSphere == null) {
-            return BACKGROUND_COLOR;
+            return backgroundColor;
         }
         return closestSphere.color();
     }
@@ -92,14 +94,4 @@ public class Scene1 extends JPanel {
         };
     }
 
-    @Override
-    public void paint(Graphics graphics) {
-        if (Objects.requireNonNull(graphics) instanceof Graphics2D g) {
-            g.setColor(BACKGROUND_COLOR);
-            g.fillRect(0, 0, CANVAS_DIMENSION.width, CANVAS_DIMENSION.height);
-            if (doubleBuffer != null) {
-                g.drawImage(doubleBuffer, 0, 0, null);
-            }
-        }
-    }
 }
