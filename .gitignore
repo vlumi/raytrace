@@ -1,0 +1,15 @@
+target/
+nb-configuration.xml
+backup/
+*.db
+*.sqlite3*
+*~
+\#*
+.*.attr
+.DS_Store
+nbproject/
+.idea/
+*.iml
+.classpath
+.project
+.settings
