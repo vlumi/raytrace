@@ -22,10 +22,9 @@ public class Scene1 extends JPanel {
 
     private static final Point CANVAS_MIN = new Point(-CANVAS_DIMENSION.width / 2, -CANVAS_DIMENSION.height / 2);
     private static final Point CANVAS_MAX = new Point(CANVAS_DIMENSION.width / 2, CANVAS_DIMENSION.height / 2);
-    private BufferedImage image;
+    private BufferedImage doubleBuffer;
 
     public Scene1() {
-        image = new BufferedImage(CANVAS_DIMENSION.width, CANVAS_DIMENSION.height, BufferedImage.TYPE_INT_RGB);
         render();
     }
 
@@ -36,6 +35,7 @@ public class Scene1 extends JPanel {
     }
 
     private void render() {
+        BufferedImage image = new BufferedImage(CANVAS_DIMENSION.width, CANVAS_DIMENSION.height, BufferedImage.TYPE_INT_RGB);
         Dot camera = new Dot(0, 0, 0);
         for (int y = CANVAS_MIN.y; y < CANVAS_MAX.y; y++) {
             for (int x = CANVAS_MIN.x; x < CANVAS_MAX.x; x++) {
@@ -44,6 +44,7 @@ public class Scene1 extends JPanel {
                 putPixel(image, x, y, color.getRGB());
             }
         }
+        this.doubleBuffer = image;
 
         repaint();
     }
@@ -96,7 +97,9 @@ public class Scene1 extends JPanel {
         if (Objects.requireNonNull(graphics) instanceof Graphics2D g) {
             g.setColor(BACKGROUND_COLOR);
             g.fillRect(0, 0, CANVAS_DIMENSION.width, CANVAS_DIMENSION.height);
-            g.drawImage(image, 0, 0, null);
+            if (doubleBuffer != null) {
+                g.drawImage(doubleBuffer, 0, 0, null);
+            }
         }
     }
 }
