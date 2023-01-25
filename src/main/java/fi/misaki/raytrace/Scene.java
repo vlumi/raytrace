@@ -6,12 +6,10 @@ import java.awt.image.BufferedImage;
 public class Scene {
 
     private static final Sphere[] SPHERES = {
-            new Sphere(new Dot(0, -1, 3), 1, new Color(255, 0, 0)),
-            new Sphere(new Dot(2, 0, 4), 1, new Color(0, 0, 255)),
-            new Sphere(new Dot(-2, 0, 4), 1, new Color(0, 255, 0))
+            new Sphere(new Point3D(0, -1, 3), 1, new Color(255, 0, 0)),
+            new Sphere(new Point3D(2, 0, 4), 1, new Color(0, 0, 255)),
+            new Sphere(new Point3D(-2, 0, 4), 1, new Color(0, 255, 0))
     };
-
-
 
     private static final double PROJECTION_PLANE_DISTANCE = 1;
 
@@ -21,7 +19,7 @@ public class Scene {
     private final DoubleDimension viewportDimension;
     private final Point canvasMin;
     private final Point canvasMax;
-    private Dot camera;
+    private Point3D camera;
 
     public Scene(Color backgroundColor, Dimension canvasDimension) {
         this.backgroundColor = backgroundColor;
@@ -39,11 +37,11 @@ public class Scene {
     }
 
     public BufferedImage render() {
-        camera = new Dot(0, 0, 0);
+        camera = new Point3D(0, 0, 0);
         BufferedImage image = new BufferedImage(canvasDimension.width, canvasDimension.height, BufferedImage.TYPE_INT_RGB);
         for (int y = canvasMin.y; y < canvasMax.y; y++) {
             for (int x = canvasMin.x; x < canvasMax.x; x++) {
-                Dot viewPort = canvasToViewPort(x, y);
+                Point3D viewPort = canvasToViewPort(x, y);
                 Color color = traceRay(camera, viewPort, 1, Double.MAX_VALUE);
                 putPixel(image, x, y, color.getRGB());
             }
@@ -51,15 +49,15 @@ public class Scene {
         return image;
     }
 
-    private Dot canvasToViewPort(double x, double y) {
-        return new Dot(
+    private Point3D canvasToViewPort(double x, double y) {
+        return new Point3D(
                 x * viewportDimension.width() / canvasDimension.width,
                 y * viewportDimension.height() / canvasDimension.height,
                 PROJECTION_PLANE_DISTANCE
         );
     }
 
-    private Color traceRay(Dot camera, Dot viewPort, double minDistance, double maxDistance) {
+    private Color traceRay(Point3D camera, Point3D viewPort, double minDistance, double maxDistance) {
         double closest = Double.MAX_VALUE;
         Sphere closestSphere = null;
         for (Sphere sphere : SPHERES) {
@@ -77,12 +75,12 @@ public class Scene {
         return closestSphere.color();
     }
 
-    private double[] intersectRaySphere(Dot camera, Dot viewPort, Sphere sphere) {
-        Dot co = camera.minus(sphere.center());
+    private double[] intersectRaySphere(Point3D camera, Point3D viewPort, Sphere sphere) {
+        Point3D co = camera.minus(sphere.center());
 
-        double a = Dot.dot(viewPort, viewPort);
-        double b = 2 * Dot.dot(co, viewPort);
-        double c = Dot.dot(co, co) - sphere.radius() * sphere.radius();
+        double a = viewPort.dot(viewPort);
+        double b = 2 * co.dot(viewPort);
+        double c = co.dot(co) - sphere.radius() * sphere.radius();
 
         double discriminant = b * b - 4 * a * c;
         if (discriminant < 0) {
