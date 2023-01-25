@@ -1,18 +1,31 @@
 package fi.misaki.raytrace;
 
+import fi.misaki.raytrace.light.AmbientLight;
+import fi.misaki.raytrace.light.DirectionalLight;
+import fi.misaki.raytrace.light.Light;
+import fi.misaki.raytrace.light.PointLight;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Scene {
 
+    // TODO: get from configuration file
     private static final Sphere[] SPHERES = {
             new Sphere(new Point3D(0, -1, 3), 1, new Color(255, 0, 0)),
             new Sphere(new Point3D(2, 0, 4), 1, new Color(0, 0, 255)),
-            new Sphere(new Point3D(-2, 0, 4), 1, new Color(0, 255, 0))
+            new Sphere(new Point3D(-2, 0, 4), 1, new Color(0, 255, 0)),
+            new Sphere(new Point3D(0, -5001, 0), 5000, new Color(255, 255, 0))
     };
-
+    // TODO: get from configuration file
+    private static final Light[] LIGHTS = {
+            new AmbientLight(0.2),
+            new PointLight(0.6, new Point3D(2, 1, 0)),
+            new DirectionalLight(0.2, new Point3D(1, 4, 4))
+    };
     private static final double PROJECTION_PLANE_DISTANCE = 1;
-
+    // TODO: get from configuration file
+    private static double FOV_SCALE = 1;
 
     private final Color backgroundColor;
     private final Dimension canvasDimension;
@@ -24,7 +37,7 @@ public class Scene {
     public Scene(Color backgroundColor, Dimension canvasDimension) {
         this.backgroundColor = backgroundColor;
         this.canvasDimension = canvasDimension;
-        this.viewportDimension = new DoubleDimension(1, 1.0 * canvasDimension.height / canvasDimension.width);
+        this.viewportDimension = new DoubleDimension(FOV_SCALE, FOV_SCALE * canvasDimension.height / canvasDimension.width);
         canvasMin = new Point(-canvasDimension.width / 2, -canvasDimension.height / 2);
         canvasMax = new Point(canvasDimension.width / 2, canvasDimension.height / 2);
         render();
@@ -72,7 +85,13 @@ public class Scene {
         if (closestSphere == null) {
             return backgroundColor;
         }
-        return closestSphere.color();
+        Point3D intersection = camera.plus(viewPort.multiply(closest));
+        Point3D normal = intersection.minus(closestSphere.center());
+        normal = normal.divide(normal.length());
+        float intensity = (float) computeLighting(intersection, normal);
+        Color color = closestSphere.color();
+        float[] hsbValues = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+        return Color.getHSBColor(hsbValues[0], hsbValues[1], hsbValues[2] * intensity);
     }
 
     private double[] intersectRaySphere(Point3D camera, Point3D viewPort, Sphere sphere) {
@@ -92,4 +111,16 @@ public class Scene {
         };
     }
 
+    private double computeLighting(Point3D target, Point3D normal) {
+        double intensity = 0;
+        for (Light light : LIGHTS) {
+            switch (light) {
+                case AmbientLight l -> intensity += l.getIntensity();
+                case DirectionalLight l -> intensity += l.getIntensity(normal);
+                case PointLight l -> intensity += l.getIntensity(target, normal);
+                default -> throw new IllegalStateException("Unexpected value: " + light);
+            }
+        }
+        return intensity;
+    }
 }
