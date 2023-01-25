@@ -7,6 +7,7 @@ import fi.misaki.raytrace.light.PointLight;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 public class Scene {
 
@@ -112,15 +113,15 @@ public class Scene {
     }
 
     private double computeLighting(Point3D target, Point3D normal) {
-        double intensity = 0;
-        for (Light light : LIGHTS) {
-            switch (light) {
-                case AmbientLight l -> intensity += l.getIntensity();
-                case DirectionalLight l -> intensity += l.getIntensity(normal);
-                case PointLight l -> intensity += l.getIntensity(target, normal);
-                default -> throw new IllegalStateException("Unexpected value: " + light);
-            }
-        }
-        return intensity;
+        return Arrays.stream(LIGHTS)
+                .map(light ->
+                        switch (light) {
+                            case AmbientLight l -> l.getIntensity();
+                            case DirectionalLight l -> l.getIntensity(normal);
+                            case PointLight l -> l.getIntensity(target, normal);
+                            default -> 0.0;
+                        }
+                )
+                .reduce(0.0, (a, b) -> a + b);
     }
 }
