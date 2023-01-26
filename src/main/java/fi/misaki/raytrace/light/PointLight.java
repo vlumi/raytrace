@@ -14,7 +14,7 @@ public class PointLight implements Light {
 
     public double getIntensity(Scene scene, Point3D target, Point3D normal, Point3D toViewPort, int specular) {
         Point3D direction = position.minus(target);
-        if (scene.getClosestShapeIntersection(target, direction, 0.001, 1).shape() != null) {
+        if (Light.isInShadow(scene, target, direction)) {
             return 0;
         }
         double angle = normal.dot(direction);

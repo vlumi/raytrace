@@ -1,8 +1,13 @@
 package fi.misaki.raytrace.light;
 
 import fi.misaki.raytrace.Point3D;
+import fi.misaki.raytrace.Scene;
 
 public interface Light {
+    static boolean isInShadow(Scene scene, Point3D target, Point3D direction) {
+        return scene.getClosestShapeIntersection(target, direction, 0.001, 1).shape() != null;
+    }
+
     static double getDiffuseIntensity(double intensity, Point3D normal, double angle, Point3D direction) {
         return angle > 0 ? intensity * angle / (normal.length() * direction.length()) : 0;
     }
