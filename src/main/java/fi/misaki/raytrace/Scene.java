@@ -76,7 +76,7 @@ public class Scene {
     }
 
     private Color traceRay(Point3D camera, Point3D viewPort, double minDistance, double maxDistance) {
-        ShapeIntersection shapeIntersection = getClosestShapeIntersection(SHAPES, camera, viewPort, minDistance, maxDistance);
+        ShapeIntersection shapeIntersection = getClosestShapeIntersection(camera, viewPort, minDistance, maxDistance);
         Shape shape = shapeIntersection.shape();
         if (shape == null) {
             return backgroundColor;
@@ -87,12 +87,16 @@ public class Scene {
         };
     }
 
-    private ShapeIntersection getClosestShapeIntersection(Shape[] shapes, Point3D camera, Point3D viewPort, double minDistance, double maxDistance) {
+    public ShapeIntersection getClosestShapeIntersection(Point3D origin, Point3D direction, double minDistance, double maxDistance) {
+        return getClosestShapeIntersection(SHAPES, origin, direction, minDistance, maxDistance);
+    }
+
+    private ShapeIntersection getClosestShapeIntersection(Shape[] shapes, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
         return Arrays.stream(shapes)
                 .map(shape ->
                         switch (shape) {
                             case Sphere sphere ->
-                                    getClosestShapeIntersection(sphere, camera, viewPort, minDistance, maxDistance);
+                                    getClosestShapeIntersection(sphere, origin, direction, minDistance, maxDistance);
                             default -> null;
                         }
                 )
@@ -103,12 +107,12 @@ public class Scene {
                 );
     }
 
-    private ShapeIntersection getClosestShapeIntersection(Sphere sphere, Point3D camera, Point3D viewPort, double minDistance, double maxDistance) {
+    private ShapeIntersection getClosestShapeIntersection(Sphere sphere, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
         ShapeIntersection result = null;
         double minIntersection = Double.MAX_VALUE;
-        double[] intersections = intersectRaySphere(camera, viewPort, sphere);
+        double[] intersections = intersectRaySphere(origin, direction, sphere);
         for (double intersection : intersections) {
-            if (intersection >= minDistance && intersection <= maxDistance && intersection < minIntersection) {
+            if (intersection > minDistance && intersection <= maxDistance && intersection < minIntersection) {
                 result = new ShapeIntersection(sphere, intersection);
             }
         }
@@ -157,8 +161,8 @@ public class Scene {
                 .map(light ->
                         switch (light) {
                             case AmbientLight l -> l.getIntensity();
-                            case DirectionalLight l -> l.getIntensity(normal, toViewPort, specular);
-                            case PointLight l -> l.getIntensity(target, normal, toViewPort, specular);
+                            case DirectionalLight l -> l.getIntensity(this, target, normal, toViewPort, specular);
+                            case PointLight l -> l.getIntensity(this, target, normal, toViewPort, specular);
                             default -> 0.0;
                         }
                 )

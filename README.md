@@ -6,7 +6,7 @@ A simple demo of software raytracing.
 
 * [ ] Resize canvas to fit window
 * [x] Lights
-* [ ] Shadows
+* [x] Shadows
 * [ ] Reflections
 * [ ] Transparency
 * [ ] Scripted movement
