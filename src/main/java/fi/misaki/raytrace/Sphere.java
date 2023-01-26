@@ -5,6 +5,7 @@ import java.awt.*;
 public record Sphere(
         Point3D center,
         double radius,
-        Color color
+        Color color,
+        int specular
 ) {
 }

@@ -11,10 +11,9 @@ public class DirectionalLight implements Light {
         this.direction = direction;
     }
 
-    public double getIntensity(Point3D normal) {
+    public double getIntensity(Point3D normal, Point3D toViewPort, int specular) {
         double angle = normal.dot(direction);
-        return angle > 0
-                ? intensity * angle / (normal.length() * direction.length())
-                : 0;
+        return Light.getDiffuseIntensity(intensity, normal, angle, direction)
+                + Light.getSpecularIntensity(intensity, normal, toViewPort, specular, direction);
     }
 }

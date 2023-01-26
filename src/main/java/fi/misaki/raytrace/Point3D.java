@@ -5,6 +5,10 @@ public record Point3D(double x, double y, double z) {
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
 
+    public Point3D negate() {
+        return new Point3D(-x, -y, -z);
+    }
+
     public Point3D plus(Point3D other) {
         return new Point3D(this.x + other.x, this.y + other.y, this.z + other.z);
     }

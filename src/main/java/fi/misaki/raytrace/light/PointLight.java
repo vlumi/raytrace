@@ -11,11 +11,11 @@ public class PointLight implements Light {
         this.position = position;
     }
 
-    public double getIntensity(Point3D target, Point3D normal) {
+    public double getIntensity(Point3D target, Point3D normal, Point3D toViewPort, int specular) {
         Point3D direction = position.minus(target);
         double angle = normal.dot(direction);
-        return angle > 0
-                ? intensity * angle / (normal.length() * direction.length())
-                : 0;
+        return Light.getDiffuseIntensity(intensity, normal, angle, direction)
+                + Light.getSpecularIntensity(intensity, normal, toViewPort, specular, direction);
     }
+
 }

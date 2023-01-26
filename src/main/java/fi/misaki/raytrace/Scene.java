@@ -13,10 +13,10 @@ public class Scene {
 
     // TODO: get from configuration file
     private static final Sphere[] SPHERES = {
-            new Sphere(new Point3D(0, -1, 3), 1, new Color(255, 0, 0)),
-            new Sphere(new Point3D(2, 0, 4), 1, new Color(0, 0, 255)),
-            new Sphere(new Point3D(-2, 0, 4), 1, new Color(0, 255, 0)),
-            new Sphere(new Point3D(0, -5001, 0), 5000, new Color(255, 255, 0))
+            new Sphere(new Point3D(0, -1, 3), 1, new Color(255, 0, 0), 500),
+            new Sphere(new Point3D(2, 0, 4), 1, new Color(0, 0, 255), 500),
+            new Sphere(new Point3D(-2, 0, 4), 1, new Color(0, 255, 0), 10),
+            new Sphere(new Point3D(0, -5001, 0), 5000, new Color(255, 255, 0), 1000)
     };
     // TODO: get from configuration file
     private static final Light[] LIGHTS = {
@@ -89,10 +89,20 @@ public class Scene {
         Point3D intersection = camera.plus(viewPort.multiply(closest));
         Point3D normal = intersection.minus(closestSphere.center());
         normal = normal.divide(normal.length());
-        float intensity = (float) computeLighting(intersection, normal);
-        Color color = closestSphere.color();
-        float[] hsbValues = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-        return Color.getHSBColor(hsbValues[0], hsbValues[1], hsbValues[2] * intensity);
+        float intensity = (float) computeLighting(intersection, normal, viewPort.negate(), closestSphere.specular());
+        return applyIntensity(closestSphere.color(), intensity);
+    }
+
+    private Color applyIntensity(Color color, float intensity) {
+        return new Color(
+                applyIntensity(color.getRed(), intensity),
+                applyIntensity(color.getGreen(), intensity),
+                applyIntensity(color.getBlue(), intensity)
+        );
+    }
+
+    private int applyIntensity(int colorChannel, float intensity) {
+        return Math.max(0, Math.min(255, Math.round(intensity * colorChannel)));
     }
 
     private double[] intersectRaySphere(Point3D camera, Point3D viewPort, Sphere sphere) {
@@ -112,13 +122,13 @@ public class Scene {
         };
     }
 
-    private double computeLighting(Point3D target, Point3D normal) {
+    private double computeLighting(Point3D target, Point3D normal, Point3D toViewPort, int specular) {
         return Arrays.stream(LIGHTS)
                 .map(light ->
                         switch (light) {
                             case AmbientLight l -> l.getIntensity();
-                            case DirectionalLight l -> l.getIntensity(normal);
-                            case PointLight l -> l.getIntensity(target, normal);
+                            case DirectionalLight l -> l.getIntensity(normal, toViewPort, specular);
+                            case PointLight l -> l.getIntensity(target, normal, toViewPort, specular);
                             default -> 0.0;
                         }
                 )
