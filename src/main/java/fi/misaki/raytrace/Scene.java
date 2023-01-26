@@ -4,6 +4,9 @@ import fi.misaki.raytrace.light.AmbientLight;
 import fi.misaki.raytrace.light.DirectionalLight;
 import fi.misaki.raytrace.light.Light;
 import fi.misaki.raytrace.light.PointLight;
+import fi.misaki.raytrace.shape.Shape;
+import fi.misaki.raytrace.shape.ShapeIntersection;
+import fi.misaki.raytrace.shape.Sphere;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -72,28 +75,42 @@ public class Scene {
     }
 
     private Color traceRay(Point3D camera, Point3D viewPort, double minDistance, double maxDistance) {
-        double closest = Double.MAX_VALUE;
+        ShapeIntersection shapeIntersection = getClosestShapeIntersection(camera, viewPort, minDistance, maxDistance);
+        Shape shape = shapeIntersection.shape();
+        if (shape == null) {
+            return backgroundColor;
+        }
+        return switch (shape) {
+            case Sphere sphere -> getColor(sphere, camera, viewPort, shapeIntersection.intersection());
+            default -> backgroundColor;
+        };
+    }
+
+    private Color getColor(Sphere sphere, Point3D camera, Point3D viewPort, double shapeIntersection) {
+        Point3D intersection = camera.plus(viewPort.multiply(shapeIntersection));
+        Point3D normal = intersection.minus(sphere.center());
+        normal = normal.divide(normal.length());
+        double intensity = computeLighting(intersection, normal, viewPort.negate(), sphere.specular());
+        return applyIntensity(sphere.color(), intensity);
+    }
+
+    private ShapeIntersection getClosestShapeIntersection(Point3D camera, Point3D viewPort, double minDistance, double maxDistance) {
+        double closestIntersection = Double.MAX_VALUE;
         Sphere closestSphere = null;
         for (Sphere sphere : SPHERES) {
             double[] intersections = intersectRaySphere(camera, viewPort, sphere);
             for (double intersection : intersections) {
-                if (intersection >= minDistance && intersection <= maxDistance && intersection < closest) {
-                    closest = intersection;
+                if (intersection >= minDistance && intersection <= maxDistance && intersection < closestIntersection) {
+                    closestIntersection = intersection;
                     closestSphere = sphere;
                 }
             }
         }
-        if (closestSphere == null) {
-            return backgroundColor;
-        }
-        Point3D intersection = camera.plus(viewPort.multiply(closest));
-        Point3D normal = intersection.minus(closestSphere.center());
-        normal = normal.divide(normal.length());
-        float intensity = (float) computeLighting(intersection, normal, viewPort.negate(), closestSphere.specular());
-        return applyIntensity(closestSphere.color(), intensity);
+        ShapeIntersection shapeIntersection = new ShapeIntersection(closestSphere, closestIntersection);
+        return shapeIntersection;
     }
 
-    private Color applyIntensity(Color color, float intensity) {
+    private Color applyIntensity(Color color, double intensity) {
         return new Color(
                 applyIntensity(color.getRed(), intensity),
                 applyIntensity(color.getGreen(), intensity),
@@ -101,8 +118,8 @@ public class Scene {
         );
     }
 
-    private int applyIntensity(int colorChannel, float intensity) {
-        return Math.max(0, Math.min(255, Math.round(intensity * colorChannel)));
+    private int applyIntensity(int colorChannel, double intensity) {
+        return Math.max(0, Math.min(255, (int) Math.round(intensity * colorChannel)));
     }
 
     private double[] intersectRaySphere(Point3D camera, Point3D viewPort, Sphere sphere) {

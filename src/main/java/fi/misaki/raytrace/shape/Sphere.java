@@ -1,4 +1,6 @@
-package fi.misaki.raytrace;
+package fi.misaki.raytrace.shape;
+
+import fi.misaki.raytrace.Point3D;
 
 import java.awt.*;
 
@@ -7,5 +9,5 @@ public record Sphere(
         double radius,
         Color color,
         int specular
-) {
+) implements Shape {
 }
