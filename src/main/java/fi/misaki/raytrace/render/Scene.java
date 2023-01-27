@@ -32,41 +32,30 @@ public class Scene {
     // TODO: get from configuration file
     private static double FOV_SCALE = 1;
 
-    private final Color backgroundColor;
-    private final Dimension canvasDimension;
-    private final DoubleDimension viewportDimension;
-    private final Point canvasMin;
-    private final Point canvasMax;
-    private Point3D camera;
+    public Scene() {}
 
-    public Scene(Color backgroundColor, Dimension canvasDimension) {
-        this.backgroundColor = backgroundColor;
-        this.canvasDimension = canvasDimension;
-        this.viewportDimension = new DoubleDimension(FOV_SCALE, FOV_SCALE * canvasDimension.height / canvasDimension.width);
-        canvasMin = new Point(-canvasDimension.width / 2, -canvasDimension.height / 2);
-        canvasMax = new Point(canvasDimension.width / 2, canvasDimension.height / 2);
-    }
 
-    private void putPixel(BufferedImage image, int x, int y, int color) {
-        int targetX = x - canvasMin.x;
-        int targetY = canvasDimension.height - (y - canvasMin.y) - 1;
-        image.setRGB(targetX, targetY, color);
-    }
-
-    public BufferedImage render() {
-        camera = new Point3D(0, 0, 0);
+    public BufferedImage render(Color backgroundColor, Dimension canvasDimension) {
+        Point3D camera = new Point3D(0, 0, 0);
         BufferedImage image = new BufferedImage(canvasDimension.width, canvasDimension.height, BufferedImage.TYPE_INT_RGB);
+        Point canvasMin = new Point(-canvasDimension.width / 2, -canvasDimension.height / 2);
+        Point canvasMax = new Point(canvasDimension.width / 2, canvasDimension.height / 2);
+
         for (int y = canvasMin.y; y < canvasMax.y; y++) {
             for (int x = canvasMin.x; x < canvasMax.x; x++) {
-                Point3D viewPort = canvasToViewPort(x, y);
-                Color color = traceRay(camera, viewPort, 1, Double.MAX_VALUE);
-                putPixel(image, x, y, color.getRGB());
+                Point3D viewPort = canvasToViewPort(canvasDimension, x, y);
+                Color color = traceRay(camera, viewPort, 1, Double.MAX_VALUE, backgroundColor);
+
+                int targetX = x - canvasMin.x;
+                int targetY = canvasDimension.height - (y - canvasMin.y) - 1;
+                putPixel(image, targetX, targetY, color.getRGB());
             }
         }
         return image;
     }
 
-    private Point3D canvasToViewPort(double x, double y) {
+    private Point3D canvasToViewPort(Dimension canvasDimension, double x, double y) {
+        DoubleDimension viewportDimension = new DoubleDimension(FOV_SCALE, FOV_SCALE * canvasDimension.height / canvasDimension.width);
         return new Point3D(
                 x * viewportDimension.width() / canvasDimension.width,
                 y * viewportDimension.height() / canvasDimension.height,
@@ -74,7 +63,11 @@ public class Scene {
         );
     }
 
-    private Color traceRay(Point3D camera, Point3D viewPort, double minDistance, double maxDistance) {
+    private void putPixel(BufferedImage image, int x, int y, int color) {
+        image.setRGB(x, y, color);
+    }
+
+    private Color traceRay(Point3D camera, Point3D viewPort, double minDistance, double maxDistance, Color backgroundColor) {
         ShapeIntersection shapeIntersection = getClosestShapeIntersection(camera, viewPort, minDistance, maxDistance);
         Shape shape = shapeIntersection.shape();
         if (shape == null) {

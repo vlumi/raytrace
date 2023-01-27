@@ -12,10 +12,7 @@ public class Main extends JPanel {
     private static final Color BACKGROUND_COLOR = Color.WHITE;
     private static final Dimension CANVAS_DIMENSION = new Dimension(800, 600);
 
-    private static final Scene scene = new Scene(
-            BACKGROUND_COLOR,
-            CANVAS_DIMENSION
-    );
+    private static final Scene scene = new Scene();
 
     private BufferedImage doubleBuffer;
 
@@ -30,7 +27,7 @@ public class Main extends JPanel {
     }
 
     public Main() {
-        doubleBuffer = scene.render();
+        doubleBuffer = scene.render(BACKGROUND_COLOR, CANVAS_DIMENSION);
     }
 
     @Override
