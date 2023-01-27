@@ -1,4 +1,4 @@
-package fi.misaki.raytrace;
+package fi.misaki.raytrace.render;
 
 public record Point3D(double x, double y, double z) {
     public double dot(Point3D other) {

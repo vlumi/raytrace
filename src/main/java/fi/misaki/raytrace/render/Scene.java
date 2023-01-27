@@ -1,4 +1,4 @@
-package fi.misaki.raytrace;
+package fi.misaki.raytrace.render;
 
 import fi.misaki.raytrace.light.AmbientLight;
 import fi.misaki.raytrace.light.DirectionalLight;
@@ -45,7 +45,6 @@ public class Scene {
         this.viewportDimension = new DoubleDimension(FOV_SCALE, FOV_SCALE * canvasDimension.height / canvasDimension.width);
         canvasMin = new Point(-canvasDimension.width / 2, -canvasDimension.height / 2);
         canvasMax = new Point(canvasDimension.width / 2, canvasDimension.height / 2);
-        render();
     }
 
     private void putPixel(BufferedImage image, int x, int y, int color) {
@@ -91,15 +90,9 @@ public class Scene {
         return getClosestShapeIntersection(SHAPES, origin, direction, minDistance, maxDistance);
     }
 
-    private ShapeIntersection getClosestShapeIntersection(Shape[] shapes, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
+    private static ShapeIntersection getClosestShapeIntersection(Shape[] shapes, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
         return Arrays.stream(shapes)
-                .map(shape ->
-                        switch (shape) {
-                            case Sphere sphere ->
-                                    getClosestShapeIntersection(sphere, origin, direction, minDistance, maxDistance);
-                            default -> null;
-                        }
-                )
+                .map(shape -> shape.getClosestIntersection(origin, direction, minDistance, maxDistance))
                 .filter(Objects::nonNull)
                 .reduce(
                         new ShapeIntersection(null, Double.MAX_VALUE),
@@ -107,16 +100,13 @@ public class Scene {
                 );
     }
 
-    private ShapeIntersection getClosestShapeIntersection(Sphere sphere, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
-        ShapeIntersection result = null;
-        double minIntersection = Double.MAX_VALUE;
-        double[] intersections = intersectRaySphere(origin, direction, sphere);
-        for (double intersection : intersections) {
-            if (intersection > minDistance && intersection <= maxDistance && intersection < minIntersection) {
-                result = new ShapeIntersection(sphere, intersection);
-            }
-        }
-        return result;
+    public boolean isIntersectingShape(Point3D origin, Point3D direction, double minDistance, double maxDistance) {
+        return isIntersectingShape(SHAPES, origin, direction, minDistance, maxDistance);
+    }
+
+    private static boolean isIntersectingShape(Shape[] shapes, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
+        return Arrays.stream(shapes)
+                .anyMatch(shape -> shape.isIntersecting(origin, direction, minDistance, maxDistance));
     }
 
     private Color getColor(Sphere sphere, Point3D camera, Point3D viewPort, double shapeIntersection) {
@@ -127,7 +117,7 @@ public class Scene {
         return applyIntensity(sphere.color(), intensity);
     }
 
-    private Color applyIntensity(Color color, double intensity) {
+    private static Color applyIntensity(Color color, double intensity) {
         return new Color(
                 applyIntensity(color.getRed(), intensity),
                 applyIntensity(color.getGreen(), intensity),
@@ -135,25 +125,8 @@ public class Scene {
         );
     }
 
-    private int applyIntensity(int colorChannel, double intensity) {
+    private static int applyIntensity(int colorChannel, double intensity) {
         return Math.max(0, Math.min(255, (int) Math.round(intensity * colorChannel)));
-    }
-
-    private double[] intersectRaySphere(Point3D camera, Point3D viewPort, Sphere sphere) {
-        Point3D co = camera.minus(sphere.center());
-
-        double a = viewPort.dot(viewPort);
-        double b = 2 * co.dot(viewPort);
-        double c = co.dot(co) - sphere.radius() * sphere.radius();
-
-        double discriminant = b * b - 4 * a * c;
-        if (discriminant < 0) {
-            return new double[]{Double.MAX_VALUE, Double.MAX_VALUE};
-        }
-        return new double[]{
-                (-b + Math.sqrt(discriminant)) / (2 * a),
-                (-b - Math.sqrt(discriminant)) / (2 * a)
-        };
     }
 
     private double computeLighting(Point3D target, Point3D normal, Point3D toViewPort, int specular) {
@@ -161,11 +134,27 @@ public class Scene {
                 .map(light ->
                         switch (light) {
                             case AmbientLight l -> l.getIntensity();
-                            case DirectionalLight l -> l.getIntensity(this, target, normal, toViewPort, specular);
-                            case PointLight l -> l.getIntensity(this, target, normal, toViewPort, specular);
+                            case DirectionalLight l -> l.getIntensity(
+                                    this::isInShadow,
+                                    target,
+                                    normal,
+                                    toViewPort,
+                                    specular
+                            );
+                            case PointLight l -> l.getIntensity(
+                                    this::isInShadow,
+                                    target,
+                                    normal,
+                                    toViewPort,
+                                    specular
+                            );
                             default -> 0.0;
                         }
                 )
                 .reduce(0.0, (a, b) -> a + b);
+    }
+
+    private boolean isInShadow(Point3D target, Point3D lightDirection) {
+        return isIntersectingShape(target, lightDirection, 0.001, 1);
     }
 }

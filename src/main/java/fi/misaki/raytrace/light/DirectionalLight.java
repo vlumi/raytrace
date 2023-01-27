@@ -1,7 +1,8 @@
 package fi.misaki.raytrace.light;
 
-import fi.misaki.raytrace.Point3D;
-import fi.misaki.raytrace.Scene;
+import fi.misaki.raytrace.render.Point3D;
+
+import java.util.function.BiFunction;
 
 public class DirectionalLight implements Light {
     private double intensity;
@@ -12,8 +13,12 @@ public class DirectionalLight implements Light {
         this.direction = direction;
     }
 
-    public double getIntensity(Scene scene, Point3D target, Point3D normal, Point3D toViewPort, int specular) {
-        if (Light.isInShadow(scene, target, direction)) {
+    public double getIntensity(BiFunction<Point3D, Point3D, Boolean> isInShadow,
+                               Point3D target,
+                               Point3D normal,
+                               Point3D toViewPort,
+                               int specular) {
+        if (isInShadow.apply(target, direction)) {
             return 0;
         }
         double angle = normal.dot(direction);
