@@ -11,10 +11,12 @@ import fi.misaki.raytrace.shape.Sphere;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
 
-public class Main extends JPanel {
+public class Main extends JPanel implements ComponentListener {
 
     // TODO: get from configuration file
     private static final Color BACKGROUND_COLOR = Color.WHITE;
@@ -31,7 +33,10 @@ public class Main extends JPanel {
     };
     private static final double PROJECTION_PLANE_DISTANCE = 1;
     private static double FOV_SCALE = 1;
-    private static final Dimension CANVAS_DIMENSION = new Dimension(800, 600);
+
+    private static final int DEFAULT_CANVAS_WIDTH = 800;
+    private static final int DEFAULT_CANVAS_HEIGHT = 600;
+    private Dimension canvasDimension;
 
     private static final Scene scene = new Scene(BACKGROUND_COLOR, SHAPES, LIGHTS, PROJECTION_PLANE_DISTANCE, FOV_SCALE);
 
@@ -39,27 +44,47 @@ public class Main extends JPanel {
 
     public static void main(String... args) {
         SwingUtilities.invokeLater(() -> {
+            Main self = new Main();
             JFrame frame = new JFrame("Raytrace");
-            frame.add(new Main());
-            frame.setSize(CANVAS_DIMENSION.width, CANVAS_DIMENSION.height);
+            frame.add(self);
+            frame.setSize(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
             frame.setVisible(true);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.addComponentListener(self);
         });
     }
 
     public Main() {
-        doubleBuffer = scene.render(CANVAS_DIMENSION);
+        canvasDimension = new Dimension(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
+        doubleBuffer = scene.render(canvasDimension);
     }
 
     @Override
     public void paint(Graphics graphics) {
         if (Objects.requireNonNull(graphics) instanceof Graphics2D g) {
             g.setColor(BACKGROUND_COLOR);
-            g.fillRect(0, 0, CANVAS_DIMENSION.width, CANVAS_DIMENSION.height);
+            g.fillRect(0, 0, canvasDimension.width, canvasDimension.height);
             if (doubleBuffer != null) {
                 g.drawImage(doubleBuffer, 0, 0, null);
             }
         }
     }
 
+    public void componentHidden(ComponentEvent e) {
+    }
+
+    public void componentMoved(ComponentEvent e) {
+    }
+
+    public void componentShown(ComponentEvent e) {
+    }
+
+    public void componentResized(ComponentEvent e) {
+        Dimension newSize = e.getComponent().getBounds().getSize();
+        if (!newSize.equals(canvasDimension)) {
+            doubleBuffer = scene.render(newSize);
+            repaint();
+        }
+        canvasDimension = newSize;
+    }
 }
