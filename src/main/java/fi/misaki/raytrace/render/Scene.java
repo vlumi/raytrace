@@ -15,27 +15,23 @@ import java.util.Objects;
 
 public class Scene {
 
-    // TODO: get from configuration file
-    private static final Shape[] SHAPES = {
-            new Sphere(new Point3D(0, -1, 3), 1, new Color(255, 0, 0), 500),
-            new Sphere(new Point3D(2, 0, 4), 1, new Color(0, 0, 255), 500),
-            new Sphere(new Point3D(-2, 0, 4), 1, new Color(0, 255, 0), 10),
-            new Sphere(new Point3D(0, -5001, 0), 5000, new Color(255, 255, 0), 1000)
-    };
-    // TODO: get from configuration file
-    private static final Light[] LIGHTS = {
-            new AmbientLight(0.2),
-            new PointLight(0.6, new Point3D(2, 1, 0)),
-            new DirectionalLight(0.2, new Point3D(1, 4, 4))
-    };
-    private static final double PROJECTION_PLANE_DISTANCE = 1;
-    // TODO: get from configuration file
-    private static double FOV_SCALE = 1;
-
-    public Scene() {}
+    private final Color backgroundColor;
+    private final Shape[] shapes;
+    private final Light[] lights;
+    private final double projectionPlaneDistance;
+    private final double fovScale;
 
 
-    public BufferedImage render(Color backgroundColor, Dimension canvasDimension) {
+    public Scene(Color backgroundColor, Shape[] shapes, Light[] lights, double projectionPlaneDistance, double fovScale) {
+        this.backgroundColor = backgroundColor;
+        this.shapes = shapes;
+        this.lights = lights;
+        this.projectionPlaneDistance = projectionPlaneDistance;
+        this.fovScale = fovScale;
+    }
+
+
+    public BufferedImage render(Dimension canvasDimension) {
         Point3D camera = new Point3D(0, 0, 0);
         BufferedImage image = new BufferedImage(canvasDimension.width, canvasDimension.height, BufferedImage.TYPE_INT_RGB);
         Point canvasMin = new Point(-canvasDimension.width / 2, -canvasDimension.height / 2);
@@ -55,11 +51,11 @@ public class Scene {
     }
 
     private Point3D canvasToViewPort(Dimension canvasDimension, double x, double y) {
-        DoubleDimension viewportDimension = new DoubleDimension(FOV_SCALE, FOV_SCALE * canvasDimension.height / canvasDimension.width);
+        DoubleDimension viewportDimension = new DoubleDimension(fovScale, fovScale * canvasDimension.height / canvasDimension.width);
         return new Point3D(
                 x * viewportDimension.width() / canvasDimension.width,
                 y * viewportDimension.height() / canvasDimension.height,
-                PROJECTION_PLANE_DISTANCE
+                projectionPlaneDistance
         );
     }
 
@@ -80,7 +76,7 @@ public class Scene {
     }
 
     public ShapeIntersection getClosestShapeIntersection(Point3D origin, Point3D direction, double minDistance, double maxDistance) {
-        return getClosestShapeIntersection(SHAPES, origin, direction, minDistance, maxDistance);
+        return getClosestShapeIntersection(shapes, origin, direction, minDistance, maxDistance);
     }
 
     private static ShapeIntersection getClosestShapeIntersection(Shape[] shapes, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
@@ -94,7 +90,7 @@ public class Scene {
     }
 
     public boolean isIntersectingShape(Point3D origin, Point3D direction, double minDistance, double maxDistance) {
-        return isIntersectingShape(SHAPES, origin, direction, minDistance, maxDistance);
+        return isIntersectingShape(shapes, origin, direction, minDistance, maxDistance);
     }
 
     private static boolean isIntersectingShape(Shape[] shapes, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
@@ -123,7 +119,7 @@ public class Scene {
     }
 
     private double computeLighting(Point3D target, Point3D normal, Point3D toViewPort, int specular) {
-        return Arrays.stream(LIGHTS)
+        return Arrays.stream(lights)
                 .map(light ->
                         switch (light) {
                             case AmbientLight l -> l.getIntensity();
