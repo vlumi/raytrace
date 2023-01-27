@@ -2,7 +2,11 @@
 
 A simple demo of software raytracing.
 
-# TODO
+## Requirements
+* Maven (optional)
+* Java 19 (with `--enable-preview`)
+
+## TODO
 
 * [ ] Resize canvas to fit window
 * [x] Lights
