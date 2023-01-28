@@ -21,10 +21,10 @@ public class Main extends JPanel implements ComponentListener {
     // TODO: get from configuration file
     private static final Color BACKGROUND_COLOR = Color.WHITE;
     private static final Shape[] SHAPES = {
-            new Sphere(new Point3D(0, -1, 3), 1, new Color(255, 0, 0), 500),
-            new Sphere(new Point3D(2, 0, 4), 1, new Color(0, 0, 255), 500),
-            new Sphere(new Point3D(-2, 0, 4), 1, new Color(0, 255, 0), 10),
-            new Sphere(new Point3D(0, -5001, 0), 5000, new Color(255, 255, 0), 1000)
+            new Sphere(new Point3D(0, -1, 3), 1, new Color(255, 0, 0), 500, 0.2),
+            new Sphere(new Point3D(2, 0, 4), 1, new Color(0, 0, 255), 500, 0.3),
+            new Sphere(new Point3D(-2, 0, 4), 1, new Color(0, 255, 0), 10, 0.4),
+            new Sphere(new Point3D(0, -5001, 0), 5000, new Color(255, 255, 0), 1000, 0.5)
     };
     private static final Light[] LIGHTS = {
             new AmbientLight(0.2),
@@ -32,15 +32,25 @@ public class Main extends JPanel implements ComponentListener {
             new DirectionalLight(0.2, new Point3D(1, 4, 4))
     };
     private static final double PROJECTION_PLANE_DISTANCE = 1;
-    private static double FOV_SCALE = 1;
-
     private static final int DEFAULT_CANVAS_WIDTH = 800;
     private static final int DEFAULT_CANVAS_HEIGHT = 600;
+    private static double FOV_SCALE = 1;
+    private static int RECURSION_DEPTH = 3;
+    private static final Scene scene = new Scene(
+            BACKGROUND_COLOR,
+            SHAPES,
+            LIGHTS,
+            PROJECTION_PLANE_DISTANCE,
+            FOV_SCALE,
+            RECURSION_DEPTH
+    );
     private Dimension canvasDimension;
-
-    private static final Scene scene = new Scene(BACKGROUND_COLOR, SHAPES, LIGHTS, PROJECTION_PLANE_DISTANCE, FOV_SCALE);
-
     private BufferedImage doubleBuffer;
+
+    public Main() {
+        canvasDimension = new Dimension(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
+        doubleBuffer = scene.render(canvasDimension);
+    }
 
     public static void main(String... args) {
         SwingUtilities.invokeLater(() -> {
@@ -52,11 +62,6 @@ public class Main extends JPanel implements ComponentListener {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.addComponentListener(self);
         });
-    }
-
-    public Main() {
-        canvasDimension = new Dimension(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
-        doubleBuffer = scene.render(canvasDimension);
     }
 
     @Override

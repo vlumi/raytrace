@@ -11,8 +11,12 @@ public interface Light {
         if (specular <= 0) {
             return 0;
         }
-        Point3D reflectedDirection = normal.multiply(2).multiply(normal.dot(direction)).minus(direction);
+        Point3D reflectedDirection = getReflectedDirection(normal, direction);
         double angle = reflectedDirection.dot(toViewPort);
         return angle > 0 ? intensity * Math.pow(angle / (reflectedDirection.length() * toViewPort.length()), specular) : 0;
+    }
+
+    static Point3D getReflectedDirection(Point3D normal, Point3D direction) {
+        return normal.multiply(2).multiply(normal.dot(direction)).minus(direction);
     }
 }

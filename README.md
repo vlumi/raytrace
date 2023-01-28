@@ -2,7 +2,7 @@
 
 A simple demo of software raytracing.
 
-![Screenshot](docs/Screen%20Shot%202023-01-26%20at%2018.19.21.png)
+![Screenshot](docs/Screen%20Shot%202023-01-28%20at%2022.09.35.png)
 
 ## Requirements
 * Maven (optional)
@@ -10,10 +10,13 @@ A simple demo of software raytracing.
 
 ## TODO
 
-* [ ] Resize canvas to fit window
+* [x] Resize canvas to fit window
 * [x] Lights
 * [x] Shadows
-* [ ] Reflections
+* [x] Reflections
 * [ ] Transparency
-* [ ] Scripted movement
+
+## Maybe?
+* [ ] Other geometric shapes
+* [ ] Scripted movement/video output
 * [ ] Loading scene from file

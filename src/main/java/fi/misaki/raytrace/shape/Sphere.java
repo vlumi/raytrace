@@ -8,7 +8,8 @@ public record Sphere(
         Point3D center,
         double radius,
         Color color,
-        int specular
+        int specular,
+        double reflective
 ) implements Shape {
     @Override
     public ShapeIntersection getClosestIntersection(Point3D origin, Point3D direction, double minDistance, double maxDistance) {
