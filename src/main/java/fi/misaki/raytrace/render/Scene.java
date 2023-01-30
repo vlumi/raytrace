@@ -38,45 +38,6 @@ public class Scene {
         this.recursionDepth = recursionDepth;
     }
 
-    private static ShapeIntersection getClosestShapeIntersection(Shape[] shapes, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
-        return Arrays.stream(shapes)
-                .map(shape -> shape.getClosestIntersection(origin, direction, minDistance, maxDistance))
-                .filter(Objects::nonNull)
-                .reduce(
-                        new ShapeIntersection(null, Double.MAX_VALUE),
-                        (a, b) -> a.intersection() < b.intersection() ? a : b
-                );
-    }
-
-    private static boolean isIntersectingShape(Shape[] shapes, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
-        return Arrays.stream(shapes)
-                .anyMatch(shape -> shape.isIntersecting(origin, direction, minDistance, maxDistance));
-    }
-
-    private static Color applyIntensity(Color color, double intensity) {
-        return new Color(
-                applyIntensity(color.getRed(), intensity),
-                applyIntensity(color.getGreen(), intensity),
-                applyIntensity(color.getBlue(), intensity)
-        );
-    }
-
-    private static int applyIntensity(int colorChannel, double intensity) {
-        return clamp((int) Math.round(intensity * colorChannel), 0, 255);
-    }
-
-    private static Color sum(Color a, Color b) {
-        return new Color(
-                clamp(a.getRed() + b.getRed(), 0, 255),
-                clamp(a.getGreen() + b.getGreen(), 0, 255),
-                clamp(a.getBlue() + b.getBlue(), 0, 255)
-        );
-    }
-
-    private static int clamp(int value, int min, int max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
     public BufferedImage render(Dimension canvasDimension) {
         Point3D camera = new Point3D(0, 0, 0);
         BufferedImage image = new BufferedImage(canvasDimension.width, canvasDimension.height, BufferedImage.TYPE_INT_RGB);
@@ -129,19 +90,26 @@ public class Scene {
     }
 
     public ShapeIntersection getClosestShapeIntersection(Point3D origin, Point3D direction, double minDistance, double maxDistance) {
-        return getClosestShapeIntersection(shapes, origin, direction, minDistance, maxDistance);
+        return Arrays.stream(shapes)
+                .map(shape -> shape.getClosestIntersection(origin, direction, minDistance, maxDistance))
+                .filter(Objects::nonNull)
+                .reduce(
+                        new ShapeIntersection(null, Double.MAX_VALUE),
+                        (a, b) -> a.intersection() < b.intersection() ? a : b
+                );
     }
 
     public boolean isIntersectingShape(Point3D origin, Point3D direction, double minDistance, double maxDistance) {
-        return isIntersectingShape(shapes, origin, direction, minDistance, maxDistance);
+        return Arrays.stream(shapes)
+                .anyMatch(shape -> shape.isIntersecting(origin, direction, minDistance, maxDistance));
     }
 
     private Color getColor(Sphere sphere, Point3D camera, Point3D viewPort, double shapeIntersection, int iteration) {
         Point3D intersection = camera.plus(viewPort.multiply(shapeIntersection));
         Point3D normal = intersection.minus(sphere.center());
         normal = normal.divide(normal.length());
-        double intensity = computeLighting(intersection, normal, viewPort.negate(), sphere.specular());
-        Color localColor = applyIntensity(sphere.color(), intensity);
+        Color tint = computeLighting(intersection, normal, viewPort.negate(), sphere.specular());
+        Color localColor = Light.applyLight(sphere.color(), tint);
 
         double reflective = sphere.reflective();
         if (iteration <= 0 || reflective <= 0) {
@@ -151,35 +119,35 @@ public class Scene {
         Point3D reflection = Light.getReflectedDirection(normal, viewPort.negate());
         Color reflectedColor = traceRay(intersection, reflection, 0.001, Double.MAX_VALUE, backgroundColor, iteration - 1);
 
-        return sum(
-                applyIntensity(localColor, (1 - reflective)),
-                applyIntensity(reflectedColor, reflective)
+        return Light.mix(
+                Light.applyLight(localColor, (1 - reflective)),
+                Light.applyLight(reflectedColor, reflective)
         );
     }
 
-    private double computeLighting(Point3D target, Point3D normal, Point3D toViewPort, int specular) {
+    private Color computeLighting(Point3D target, Point3D normal, Point3D toViewPort, int specular) {
         return Arrays.stream(lights)
                 .map(light ->
                         switch (light) {
-                            case AmbientLight l -> l.getIntensity();
-                            case DirectionalLight l -> l.getIntensity(
+                            case AmbientLight l -> l.getTint();
+                            case DirectionalLight l -> l.getTint(
                                     this::isInShadow,
                                     target,
                                     normal,
                                     toViewPort,
                                     specular
                             );
-                            case PointLight l -> l.getIntensity(
+                            case PointLight l -> l.getTint(
                                     this::isInShadow,
                                     target,
                                     normal,
                                     toViewPort,
                                     specular
                             );
-                            default -> 0.0;
+                            default -> Color.BLACK;
                         }
                 )
-                .reduce(0.0, (a, b) -> a + b);
+                .reduce(Color.BLACK, Light::mix);
     }
 
     private boolean isInShadow(Point3D target, Point3D lightDirection) {

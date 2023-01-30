@@ -15,6 +15,7 @@ A simple demo of software raytracing.
 * [x] Shadows
 * [x] Reflections
 * [ ] Transparency
+* [x] Colored lighting
 
 ## Maybe?
 * [ ] Other geometric shapes

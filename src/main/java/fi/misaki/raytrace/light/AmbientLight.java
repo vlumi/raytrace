@@ -1,13 +1,15 @@
 package fi.misaki.raytrace.light;
 
-public class AmbientLight implements Light {
-    private double intensity;
+import java.awt.*;
 
-    public AmbientLight(double intensity) {
-        this.intensity = intensity;
+public class AmbientLight implements Light {
+    private Color tint;
+
+    public AmbientLight(Color tint) {
+        this.tint = tint;
     }
 
-    public double getIntensity() {
-        return intensity;
+    public Color getTint() {
+        return tint;
     }
 }

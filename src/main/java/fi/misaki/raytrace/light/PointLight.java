@@ -2,29 +2,32 @@ package fi.misaki.raytrace.light;
 
 import fi.misaki.raytrace.render.Point3D;
 
+import java.awt.*;
 import java.util.function.BiFunction;
 
 public class PointLight implements Light {
-    private double intensity;
+    private Color tint;
     private Point3D position;
 
-    public PointLight(double intensity, Point3D position) {
-        this.intensity = intensity;
+    public PointLight(Color tint, Point3D position) {
+        this.tint = tint;
         this.position = position;
     }
 
-    public double getIntensity(BiFunction<Point3D, Point3D, Boolean> isInShadow,
-                               Point3D target,
-                               Point3D normal,
-                               Point3D toViewPort,
-                               int specular) {
+    public Color getTint(BiFunction<Point3D, Point3D, Boolean> isInShadow,
+                         Point3D target,
+                         Point3D normal,
+                         Point3D toViewPort,
+                         int specular) {
         Point3D direction = position.minus(target);
         if (isInShadow.apply(target, direction)) {
-            return 0;
+            return Color.BLACK;
         }
         double angle = normal.dot(direction);
-        return Light.getDiffuseIntensity(intensity, normal, angle, direction)
-                + Light.getSpecularIntensity(intensity, normal, toViewPort, specular, direction);
+        return Light.mix(
+                Light.getDiffuseIntensity(tint, normal, angle, direction),
+                Light.getSpecularIntensity(tint, normal, toViewPort, specular, direction)
+        );
     }
 
 }

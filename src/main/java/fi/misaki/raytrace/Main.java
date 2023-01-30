@@ -27,9 +27,9 @@ public class Main extends JPanel implements ComponentListener {
             new Sphere(new Point3D(0, -5001, 0), 5000, new Color(255, 255, 0), 1000, 0.5)
     };
     private static final Light[] LIGHTS = {
-            new AmbientLight(0.2),
-            new PointLight(0.6, new Point3D(2, 1, 0)),
-            new DirectionalLight(0.2, new Point3D(1, 4, 4))
+            new AmbientLight(new Color(51, 51, 51)),
+            new PointLight(new Color(153, 153, 153), new Point3D(2, 1, 0)),
+            new DirectionalLight(new Color(51, 51, 51), new Point3D(1, 4, 4))
     };
     private static final double PROJECTION_PLANE_DISTANCE = 1;
     private static final int DEFAULT_CANVAS_WIDTH = 800;
