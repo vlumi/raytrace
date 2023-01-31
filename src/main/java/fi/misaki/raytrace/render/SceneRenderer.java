@@ -7,7 +7,6 @@ import fi.misaki.raytrace.light.PointLight;
 import fi.misaki.raytrace.scene.Scene;
 import fi.misaki.raytrace.shape.Shape;
 import fi.misaki.raytrace.shape.ShapeIntersection;
-import fi.misaki.raytrace.shape.Sphere;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -92,27 +91,11 @@ public class SceneRenderer {
 
     private static Optional<Color> getColor(Scene scene, Shape shape, Point3D camera, Point3D viewPort, double shapeIntersection, int iteration) {
         Point3D intersection = camera.plus(viewPort.multiply(shapeIntersection));
+        Point3D normal = shape.normal(intersection);
+        Color tint = computeLighting(scene, intersection, normal, viewPort.negate(), shape.specular());
+        Color localColor = Light.applyLight(shape.color(), tint);
 
-        // TODO: move to Shape
-        Point3D normal;
-        int specular;
-        Color shapeColor;
-        double reflective;
-        switch (shape) {
-            case Sphere sphere:
-                normal = intersection.minus(sphere.center());
-                normal = normal.divide(normal.length());
-                specular = sphere.specular();
-                shapeColor = sphere.color();
-                reflective = sphere.reflective();
-                break;
-            default:
-                return Optional.empty();
-        }
-
-        Color tint = computeLighting(scene, intersection, normal, viewPort.negate(), specular);
-        Color localColor = Light.applyLight(shapeColor, tint);
-
+        double reflective = shape.reflective();
         if (iteration <= 0 || reflective <= 0) {
             return Optional.of(localColor);
         }

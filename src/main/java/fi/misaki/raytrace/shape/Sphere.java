@@ -11,6 +11,13 @@ public record Sphere(
         int specular,
         double reflective
 ) implements Shape {
+
+    @Override
+    public Point3D normal(Point3D intersection) {
+        Point3D normal = intersection.minus(center);
+        return normal.divide(normal.length());
+    }
+
     @Override
     public ShapeIntersection getClosestIntersection(Point3D origin, Point3D direction, double minDistance, double maxDistance) {
         ShapeIntersection result = null;
