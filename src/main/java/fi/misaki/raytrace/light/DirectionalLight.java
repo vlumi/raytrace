@@ -3,7 +3,7 @@ package fi.misaki.raytrace.light;
 import fi.misaki.raytrace.render.Point3D;
 
 import java.awt.*;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class DirectionalLight implements Light {
     private Color tint;
@@ -14,12 +14,12 @@ public class DirectionalLight implements Light {
         this.direction = direction;
     }
 
-    public Color getTint(BiFunction<Point3D, Point3D, Boolean> isInShadow,
+    public Color getTint(Function<Point3D, Boolean> isInShadow,
                          Point3D target,
                          Point3D normal,
                          Point3D toViewPort,
                          int specular) {
-        if (isInShadow.apply(target, direction)) {
+        if (isInShadow.apply(direction)) {
             return Color.BLACK;
         }
         double angle = normal.dot(direction);

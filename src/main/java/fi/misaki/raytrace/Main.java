@@ -5,7 +5,8 @@ import fi.misaki.raytrace.light.DirectionalLight;
 import fi.misaki.raytrace.light.Light;
 import fi.misaki.raytrace.light.PointLight;
 import fi.misaki.raytrace.render.Point3D;
-import fi.misaki.raytrace.render.Scene;
+import fi.misaki.raytrace.render.SceneRenderer;
+import fi.misaki.raytrace.scene.Scene;
 import fi.misaki.raytrace.shape.Shape;
 import fi.misaki.raytrace.shape.Sphere;
 
@@ -35,21 +36,21 @@ public class Main extends JPanel implements ComponentListener {
     private static final int DEFAULT_CANVAS_WIDTH = 800;
     private static final int DEFAULT_CANVAS_HEIGHT = 600;
     private static double FOV_SCALE = 1;
-    private static int RECURSION_DEPTH = 3;
-    private static final Scene scene = new Scene(
+    private static final Scene SCENE = new Scene(
             BACKGROUND_COLOR,
             SHAPES,
             LIGHTS,
             PROJECTION_PLANE_DISTANCE,
-            FOV_SCALE,
-            RECURSION_DEPTH
+            FOV_SCALE
     );
+    private static int RECURSION_DEPTH = 3;
+    private static final SceneRenderer sceneRenderer = new SceneRenderer(SCENE, RECURSION_DEPTH);
     private Dimension canvasDimension;
     private BufferedImage doubleBuffer;
 
     public Main() {
         canvasDimension = new Dimension(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
-        doubleBuffer = scene.render(canvasDimension);
+        doubleBuffer = sceneRenderer.render(canvasDimension);
     }
 
     public static void main(String... args) {
@@ -87,7 +88,7 @@ public class Main extends JPanel implements ComponentListener {
     public void componentResized(ComponentEvent e) {
         Dimension newSize = e.getComponent().getBounds().getSize();
         if (!newSize.equals(canvasDimension)) {
-            doubleBuffer = scene.render(newSize);
+            doubleBuffer = sceneRenderer.render(newSize);
             repaint();
         }
         canvasDimension = newSize;
