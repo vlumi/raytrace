@@ -2,13 +2,13 @@
 
 A simple demo of software raytracing.
 
-![Screenshot](docs/Screen%20Shot%202023-01-28%20at%2022.09.35.png)
+![Screenshot](docs/Screen%20Shot%202023-02-01%20at%2022.29.12.png)
 
 ## Features
 
 * Camera
   * Adjustable position
-  * Fixed rotation
+  * Adjustable rotation (pitch, yaw, roll)
 * Shapes
   * Position
   * Color
@@ -27,7 +27,6 @@ A simple demo of software raytracing.
 
 ### TODO
 
-* Camera position & angle
 * Transparency; opacity, refraction
 
 ### Maybe?

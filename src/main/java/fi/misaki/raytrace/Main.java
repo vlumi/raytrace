@@ -21,7 +21,7 @@ import java.util.Objects;
 public class Main extends JPanel implements ComponentListener {
 
     // TODO: get from configuration file
-    private static final Camera CAMERA = new Camera(new Point3D(0, 0, 0), new Point3D(0, 0, 0));
+    private static final Camera CAMERA = new Camera(new Point3D(1, 1, -1), new Point3D(Math.PI / 12, -Math.PI / 12, Math.PI / 12));
     private static final Color BACKGROUND_COLOR = Color.WHITE;
     private static final Shape[] SHAPES = {
             new Sphere(new Point3D(0, -1, 3), 1, new Color(255, 0, 0), 500, 0.2),
