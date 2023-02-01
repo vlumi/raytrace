@@ -12,23 +12,34 @@ import java.util.Optional;
 public interface Shape {
     static Color traceRay(
             Scene scene,
-            Point3D camera,
+            Point3D origin,
             Point3D viewPort,
             double minDistance,
             double maxDistance,
-            Color backgroundColor,
             int iteration
     ) {
-        ShapeIntersection shapeIntersection = getClosestIntersection(scene.shapes(), camera, viewPort, minDistance, maxDistance);
+        ShapeIntersection shapeIntersection = getClosestIntersection(
+                scene.shapes(),
+                origin,
+                viewPort,
+                minDistance,
+                maxDistance
+        );
         Shape shape = shapeIntersection.shape();
         if (shape == null) {
-            return backgroundColor;
+            return scene.backgroundColor();
         }
-        return computerColor(scene, shape, camera, viewPort, shapeIntersection.intersection(), iteration)
-                .orElse(backgroundColor);
+        return computerColor(scene, shape, origin, viewPort, shapeIntersection.intersection(), iteration)
+                .orElse(scene.backgroundColor());
     }
 
-    private static ShapeIntersection getClosestIntersection(Shape[] shapes, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
+    private static ShapeIntersection getClosestIntersection(
+            Shape[] shapes,
+            Point3D origin,
+            Point3D direction,
+            double minDistance,
+            double maxDistance
+    ) {
         return Arrays.stream(shapes)
                 .map(shape -> shape.getClosestIntersection(origin, direction, minDistance, maxDistance))
                 .filter(Objects::nonNull)
@@ -38,10 +49,23 @@ public interface Shape {
                 );
     }
 
-    private static Optional<Color> computerColor(Scene scene, Shape shape, Point3D camera, Point3D viewPort, double shapeIntersection, int iteration) {
+    private static Optional<Color> computerColor(
+            Scene scene,
+            Shape shape,
+            Point3D camera,
+            Point3D viewPort,
+            double shapeIntersection,
+            int iteration
+    ) {
         Point3D intersection = camera.plus(viewPort.multiply(shapeIntersection));
         Point3D normal = shape.normal(intersection);
-        Color tint = Light.compute(scene, intersection, normal, viewPort.negate(), shape.specular());
+        Color tint = Light.compute(
+                scene,
+                intersection,
+                normal,
+                viewPort.negate(),
+                shape.specular()
+        );
         Color localColor = Light.applyLight(shape.color(), tint);
 
         double reflective = shape.reflective();
@@ -56,7 +80,6 @@ public interface Shape {
                 reflection,
                 0.001,
                 Double.MAX_VALUE,
-                scene.backgroundColor(),
                 iteration - 1
         );
 

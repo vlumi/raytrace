@@ -6,6 +6,7 @@ import fi.misaki.raytrace.light.Light;
 import fi.misaki.raytrace.light.PointLight;
 import fi.misaki.raytrace.render.Point3D;
 import fi.misaki.raytrace.render.SceneRenderer;
+import fi.misaki.raytrace.scene.Camera;
 import fi.misaki.raytrace.scene.Scene;
 import fi.misaki.raytrace.shape.Shape;
 import fi.misaki.raytrace.shape.Sphere;
@@ -20,6 +21,7 @@ import java.util.Objects;
 public class Main extends JPanel implements ComponentListener {
 
     // TODO: get from configuration file
+    private static final Camera CAMERA = new Camera(new Point3D(0, 0, 0), new Point3D(0, 0, 0));
     private static final Color BACKGROUND_COLOR = Color.WHITE;
     private static final Shape[] SHAPES = {
             new Sphere(new Point3D(0, -1, 3), 1, new Color(255, 0, 0), 500, 0.2),
@@ -37,6 +39,7 @@ public class Main extends JPanel implements ComponentListener {
     private static final int DEFAULT_CANVAS_HEIGHT = 600;
     private static double FOV_SCALE = 1;
     private static final Scene SCENE = new Scene(
+            CAMERA,
             BACKGROUND_COLOR,
             SHAPES,
             LIGHTS,

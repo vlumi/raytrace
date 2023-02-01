@@ -7,8 +7,8 @@ A simple demo of software raytracing.
 ## Features
 
 * Camera
-  * Fixed position
-  * Fixed viewport
+  * Adjustable position
+  * Fixed rotation
 * Shapes
   * Position
   * Color

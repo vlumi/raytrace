@@ -6,6 +6,7 @@ import fi.misaki.raytrace.shape.Shape;
 import java.awt.*;
 
 public record Scene(
+        Camera camera,
         Color backgroundColor,
         Shape[] shapes,
         Light[] lights,
