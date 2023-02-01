@@ -24,7 +24,7 @@ public class SceneRenderer {
         Point canvasMin = new Point(-canvasDimension.width / 2, -canvasDimension.height / 2);
         Point canvasMax = new Point(canvasDimension.width / 2, canvasDimension.height / 2);
 
-        RotationMatrix rotationMatrix = RotationMatrix.from(scene.camera().rotationRad());
+        RotationMatrix rotationMatrix = scene.camera().rotationMatrix();
 
         for (int y = canvasMin.y; y < canvasMax.y; y++) {
             for (int x = canvasMin.x; x < canvasMax.x; x++) {
