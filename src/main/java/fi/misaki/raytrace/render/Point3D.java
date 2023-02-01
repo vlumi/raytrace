@@ -21,6 +21,14 @@ public record Point3D(double x, double y, double z) {
         return new Point3D(x * by, y * by, z * by);
     }
 
+    public Point3D multiply(RotationMatrix by) {
+        return new Point3D(
+                x * by.x().x + y * by.x().y + z * by.x().z,
+                x * by.y().x + y * by.y().y + z * by.y().z,
+                x * by.z().x + y * by.z().y + z * by.z().z
+        );
+    }
+
     public Point3D divide(double by) {
         return new Point3D(x / by, y / by, z / by);
     }
