@@ -1,6 +1,7 @@
 package fi.misaki.raytrace.shape;
 
 import fi.misaki.raytrace.light.Light;
+import fi.misaki.raytrace.render.DistanceRange;
 import fi.misaki.raytrace.render.Point3D;
 import fi.misaki.raytrace.scene.Scene;
 
@@ -14,16 +15,14 @@ public interface Shape {
             Scene scene,
             Point3D origin,
             Point3D viewPort,
-            double minDistance,
-            double maxDistance,
+            DistanceRange range,
             int iteration
     ) {
         ShapeIntersection shapeIntersection = getClosestIntersection(
                 scene.shapes(),
                 origin,
                 viewPort,
-                minDistance,
-                maxDistance
+                range
         );
         Shape shape = shapeIntersection.shape();
         if (shape == null) {
@@ -37,11 +36,10 @@ public interface Shape {
             Shape[] shapes,
             Point3D origin,
             Point3D direction,
-            double minDistance,
-            double maxDistance
+            DistanceRange range
     ) {
         return Arrays.stream(shapes)
-                .map(shape -> shape.getClosestIntersection(origin, direction, minDistance, maxDistance))
+                .map(shape -> shape.getClosestIntersection(origin, direction, range))
                 .filter(Objects::nonNull)
                 .reduce(
                         new ShapeIntersection(null, Double.MAX_VALUE),
@@ -78,8 +76,7 @@ public interface Shape {
                 scene,
                 intersection,
                 reflection,
-                0.001,
-                Double.MAX_VALUE,
+                new DistanceRange(),
                 iteration - 1
         );
 
@@ -99,7 +96,7 @@ public interface Shape {
 
     Point3D normal(Point3D intersection);
 
-    ShapeIntersection getClosestIntersection(Point3D origin, Point3D direction, double minDistance, double maxDistance);
+    ShapeIntersection getClosestIntersection(Point3D origin, Point3D direction, DistanceRange range);
 
-    boolean isIntersecting(Point3D origin, Point3D direction, double minDistance, double maxDistance);
+    boolean isIntersecting(Point3D origin, Point3D direction, DistanceRange range);
 }

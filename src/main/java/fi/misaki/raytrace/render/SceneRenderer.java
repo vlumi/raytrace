@@ -34,8 +34,7 @@ public class SceneRenderer {
                         scene,
                         scene.camera().position(),
                         viewPort.multiply(rotationMatrix),
-                        1,
-                        Double.MAX_VALUE,
+                        new DistanceRange(1, Double.MAX_VALUE),
                         recursionDepth
                 );
 

@@ -1,5 +1,6 @@
 package fi.misaki.raytrace.light;
 
+import fi.misaki.raytrace.render.DistanceRange;
 import fi.misaki.raytrace.render.Point3D;
 import fi.misaki.raytrace.scene.Scene;
 import fi.misaki.raytrace.shape.Shape;
@@ -34,12 +35,12 @@ public interface Light {
     }
 
     private static boolean isInShadow(Shape[] shapes, Point3D target, Point3D lightDirection) {
-        return isIntersectingShape(shapes, target, lightDirection, 0.001, 1);
+        return isIntersectingShape(shapes, target, lightDirection, new DistanceRange(1));
     }
 
-    public static boolean isIntersectingShape(Shape[] shapes, Point3D origin, Point3D direction, double minDistance, double maxDistance) {
+    public static boolean isIntersectingShape(Shape[] shapes, Point3D origin, Point3D direction, DistanceRange range) {
         return Arrays.stream(shapes)
-                .anyMatch(shape -> shape.isIntersecting(origin, direction, minDistance, maxDistance));
+                .anyMatch(shape -> shape.isIntersecting(origin, direction, range));
     }
 
     static Color getDiffuseIntensity(Color tint, Point3D normal, double angle, Point3D direction) {
