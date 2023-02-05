@@ -14,18 +14,18 @@ public class DirectionalLight implements Light {
         this.direction = direction;
     }
 
-    public Color getTint(Function<Point3D, Boolean> isInShadow,
-                         Point3D target,
-                         Point3D normal,
-                         Point3D toViewPort,
-                         int specular) {
-        if (isInShadow.apply(direction)) {
-            return Color.BLACK;
-        }
+    public Color getTint(
+            Function<Point3D, Color> getShadowTint,
+            Point3D target,
+            Point3D normal,
+            Point3D toViewPort,
+            int specular
+    ) {
+        Color shadedTint = Light.applyLight(tint, getShadowTint.apply(direction));
         double angle = normal.dot(direction);
         return Light.mix(
-                Light.getDiffuseIntensity(tint, normal, angle, direction),
-                Light.getSpecularIntensity(tint, normal, toViewPort, specular, direction)
+                Light.getDiffuseIntensity(shadedTint, normal, angle, direction),
+                Light.getSpecularIntensity(shadedTint, normal, toViewPort, specular, direction)
         );
     }
 

@@ -15,14 +15,14 @@ public interface Light {
                         switch (light) {
                             case AmbientLight l -> l.getTint();
                             case DirectionalLight l -> l.getTint(
-                                    (direction) -> isInShadow(scene.shapes(), target, direction),
+                                    (direction) -> getShadowTint(scene.shapes(), target, direction),
                                     target,
                                     normal,
                                     toViewPort,
                                     specular
                             );
                             case PointLight l -> l.getTint(
-                                    (direction) -> isInShadow(scene.shapes(), target, direction),
+                                    (direction) -> getShadowTint(scene.shapes(), target, direction),
                                     target,
                                     normal,
                                     toViewPort,
@@ -34,8 +34,12 @@ public interface Light {
                 .reduce(Color.BLACK, Light::mix);
     }
 
-    private static boolean isInShadow(Shape[] shapes, Point3D target, Point3D lightDirection) {
-        return isIntersectingShape(shapes, target, lightDirection, new DistanceRange(1));
+    private static Color getShadowTint(Shape[] shapes, Point3D target, Point3D lightDirection) {
+        // TODO: calculate shadow color
+        if (isIntersectingShape(shapes, target, lightDirection, new DistanceRange(1))) {
+            return Color.BLACK;
+        }
+        return new Color(255, 255, 255);
     }
 
     public static boolean isIntersectingShape(Shape[] shapes, Point3D origin, Point3D direction, DistanceRange range) {
