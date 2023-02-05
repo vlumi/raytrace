@@ -66,9 +66,76 @@ public interface Shape {
         );
         Color localColor = Light.applyLight(shape.color(), tint);
 
-        double reflective = shape.reflective();
+        Color translucentColor = mixTranslucentColor(
+                scene,
+                shape,
+                intersection,
+                normal,
+                viewPort,
+                localColor,
+                iteration
+        );
+
+        Color reflectedColor = mixReflectedColor(
+                scene,
+                intersection,
+                normal,
+                viewPort,
+                translucentColor,
+                shape.reflective(),
+                iteration
+        );
+
+        return Optional.of(reflectedColor);
+    }
+
+    private static Color mixTranslucentColor(
+            Scene scene,
+            Shape shape,
+            Point3D intersection,
+            Point3D normal,
+            Point3D viewPort,
+            Color localColor,
+            int iteration
+    ) {
+        if (shape.opacity() >= 1) {
+            return localColor;
+        }
+
+        // TODO: refraction at entry
+        Point3D entryDirection = viewPort;
+        // TODO: exit point
+        Point3D exitIntersection = intersection;
+        // TODO: calculate distance within object
+        // TODO: opacity affected by distance traveled within the object (opacity * distance / diameter)
+        double distance = shape.nominalDiameter();
+        double adjustedOpacity = shape.opacity() * distance / shape.nominalDiameter();
+        // TODO: refraction at exit
+        Point3D exitDirection = entryDirection;
+        Color translucentColor = traceRay(
+                scene,
+                exitIntersection,
+                exitDirection,
+                new DistanceRange(),
+                iteration
+        );
+        return Light.mix(
+                Light.applyLight(localColor, adjustedOpacity),
+                Light.applyLight(translucentColor, 1 - adjustedOpacity)
+        );
+    }
+
+    private static Color mixReflectedColor(
+            Scene scene,
+            Point3D intersection,
+            Point3D normal,
+            Point3D viewPort,
+            Color localColor,
+            double reflective,
+            int iteration
+    ) {
         if (iteration <= 0 || reflective <= 0) {
-            return Optional.of(localColor);
+            return localColor;
         }
 
         Point3D reflection = Light.getReflectedDirection(normal, viewPort.negate());
@@ -80,11 +147,9 @@ public interface Shape {
                 iteration - 1
         );
 
-        return Optional.of(
-                Light.mix(
-                        Light.applyLight(localColor, (1 - reflective)),
-                        Light.applyLight(reflectedColor, reflective)
-                )
+        return Light.mix(
+                Light.applyLight(localColor, 1 - reflective),
+                Light.applyLight(reflectedColor, reflective)
         );
     }
 
@@ -93,6 +158,10 @@ public interface Shape {
     int specular();
 
     double reflective();
+
+    double opacity();
+
+    double nominalDiameter();
 
     Point3D normal(Point3D intersection);
 

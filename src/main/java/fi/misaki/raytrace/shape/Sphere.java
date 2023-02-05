@@ -10,8 +10,14 @@ public record Sphere(
         double radius,
         Color color,
         int specular,
-        double reflective
+        double reflective,
+        double opacity
 ) implements Shape {
+
+    @Override
+    public double nominalDiameter() {
+        return radius * 2;
+    }
 
     @Override
     public Point3D normal(Point3D intersection) {
