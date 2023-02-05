@@ -15,7 +15,7 @@ A simple demo of software raytracing.
   * Reflections
     * Reflectivity
   * Transparency
-    * Simple
+    * Opacity
   * Types
     * Sphere
 * Lighting
@@ -29,7 +29,9 @@ A simple demo of software raytracing.
 
 ### TODO
 
-* Transparency; opacity by distance traveled, refraction
+* Transparency
+  * Refraction
+  * Impact on shadow
 
 ### Maybe?
 * Other geometric shapes

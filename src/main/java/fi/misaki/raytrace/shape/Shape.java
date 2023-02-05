@@ -18,7 +18,7 @@ public interface Shape {
             DistanceRange range,
             int iteration
     ) {
-        ShapeIntersection shapeIntersection = getClosestIntersection(
+        ShapeIntersectionDistance shapeIntersection = getClosestIntersection(
                 scene.shapes(),
                 origin,
                 viewPort,
@@ -28,11 +28,11 @@ public interface Shape {
         if (shape == null) {
             return scene.backgroundColor();
         }
-        return computerColor(scene, shape, origin, viewPort, shapeIntersection.intersection(), iteration)
+        return computerColor(scene, shape, origin, viewPort, shapeIntersection.distance(), iteration)
                 .orElse(scene.backgroundColor());
     }
 
-    private static ShapeIntersection getClosestIntersection(
+    private static ShapeIntersectionDistance getClosestIntersection(
             Shape[] shapes,
             Point3D origin,
             Point3D direction,
@@ -40,10 +40,10 @@ public interface Shape {
     ) {
         return Arrays.stream(shapes)
                 .map(shape -> shape.getClosestIntersection(origin, direction, range))
-                .filter(Objects::nonNull)
+                .flatMap(Optional::stream)
                 .reduce(
-                        new ShapeIntersection(null, Double.MAX_VALUE),
-                        (a, b) -> a.intersection() < b.intersection() ? a : b
+                        new ShapeIntersectionDistance(null, Double.MAX_VALUE),
+                        (a, b) -> a.distance() < b.distance() ? a : b
                 );
     }
 
@@ -104,25 +104,26 @@ public interface Shape {
 
         // TODO: refraction at entry
         Point3D entryDirection = viewPort;
-        // TODO: exit point
-        Point3D exitIntersection = intersection;
-        // TODO: calculate distance within object
-        // TODO: opacity affected by distance traveled within the object (opacity * distance / diameter)
-        double distance = shape.nominalDiameter();
-        double adjustedOpacity = shape.opacity() * distance / shape.nominalDiameter();
-        // TODO: refraction at exit
-        Point3D exitDirection = entryDirection;
-        Color translucentColor = traceRay(
-                scene,
-                exitIntersection,
-                exitDirection,
-                new DistanceRange(),
-                iteration
-        );
-        return Light.mix(
-                Light.applyLight(localColor, adjustedOpacity),
-                Light.applyLight(translucentColor, 1 - adjustedOpacity)
-        );
+        return shape.getClosestIntersection(intersection, entryDirection, new DistanceRange())
+                .map(exitIntersectionDistance -> {
+                    double distance = exitIntersectionDistance.distance();
+                    Point3D exitIntersection = intersection.plus(entryDirection.multiply(distance));
+                    double adjustedOpacity = shape.opacity() * distance / shape.nominalDiameter();
+                    // TODO: refraction at exitIntersectionDistance
+                    Point3D exitDirection = entryDirection;
+                    Color translucentColor = traceRay(
+                            scene,
+                            exitIntersection,
+                            exitDirection,
+                            new DistanceRange(),
+                            iteration
+                    );
+                    return Light.mix(
+                            Light.applyLight(localColor, adjustedOpacity),
+                            Light.applyLight(translucentColor, 1 - adjustedOpacity)
+                    );
+                })
+                .orElse(localColor);
     }
 
     private static Color mixReflectedColor(
@@ -165,7 +166,7 @@ public interface Shape {
 
     Point3D normal(Point3D intersection);
 
-    ShapeIntersection getClosestIntersection(Point3D origin, Point3D direction, DistanceRange range);
+    Optional<ShapeIntersectionDistance> getClosestIntersection(Point3D origin, Point3D direction, DistanceRange range);
 
     boolean isIntersecting(Point3D origin, Point3D direction, DistanceRange range);
 }

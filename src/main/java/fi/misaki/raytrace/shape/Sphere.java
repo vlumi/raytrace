@@ -4,6 +4,7 @@ import fi.misaki.raytrace.render.DistanceRange;
 import fi.misaki.raytrace.render.Point3D;
 
 import java.awt.*;
+import java.util.Optional;
 
 public record Sphere(
         Point3D center,
@@ -26,16 +27,16 @@ public record Sphere(
     }
 
     @Override
-    public ShapeIntersection getClosestIntersection(Point3D origin, Point3D direction, DistanceRange range) {
-        ShapeIntersection result = null;
+    public Optional<ShapeIntersectionDistance> getClosestIntersection(Point3D origin, Point3D direction, DistanceRange range) {
+        ShapeIntersectionDistance result = null;
         double minIntersection = Double.MAX_VALUE;
         double[] intersections = intersectRaySphere(origin, direction);
         for (double intersection : intersections) {
             if (range.includes(intersection) && intersection < minIntersection) {
-                result = new ShapeIntersection(this, intersection);
+                result = new ShapeIntersectionDistance(this, intersection);
             }
         }
-        return result;
+        return Optional.ofNullable(result);
     }
 
     @Override
