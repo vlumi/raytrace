@@ -2,7 +2,7 @@
 
 A simple demo of software raytracing.
 
-![Screenshot](docs/Screen%20Shot%202023-02-05%20at%2021.54.32.png)
+![Screenshot](docs/Screen%20Shot%202023-02-05%20at%2022.58.08.png)
 
 ## Features
 
@@ -14,7 +14,7 @@ A simple demo of software raytracing.
   * Color
   * Reflections
     * Reflectivity
-  * Transparency
+  * Translucency
     * Opacity
   * Types
     * Sphere
@@ -29,9 +29,8 @@ A simple demo of software raytracing.
 
 ### TODO
 
-* Transparency
-  * Refraction
-  * Impact on shadow
+* Refraction
+* Shadow of translucent shapes
 
 ### Maybe?
 * Other geometric shapes

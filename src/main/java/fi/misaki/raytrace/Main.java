@@ -21,13 +21,13 @@ import java.util.Objects;
 public class Main extends JPanel implements ComponentListener {
 
     // TODO: get from configuration file
-    private static final Camera CAMERA = new Camera(new Point3D(1.3, 0.3, -0.6), new Point3D(Math.PI / 24, -Math.PI / 10, Math.PI / 12));
+    private static final Camera CAMERA = new Camera(new Point3D(2.5, 0.5, -5), new Point3D(Math.PI / 24, -Math.PI / 10, Math.PI / 12));
     private static final Color BACKGROUND_COLOR = Color.WHITE;
     private static final Shape[] SHAPES = {
-            new Sphere(new Point3D(0, -1, 3), 1.2, new Color(255, 0, 0), 500, 0.2, 0.5),
+            new Sphere(new Point3D(0, -1, 3), 1.2, new Color(255, 0, 0), 500, 0.2, 0.9),
             new Sphere(new Point3D(2, 0, 4), 1.1, new Color(0, 0, 255), 500, 0.3, 1),
             new Sphere(new Point3D(-2, 0, 4), 1, new Color(0, 255, 0), 10, 0.4, 1),
-            new Sphere(new Point3D(0, -5001, 0), 5000, new Color(255, 255, 0), 1000, 0.5, 1)
+            new Sphere(new Point3D(0, -5002.2, 0), 5000, new Color(255, 255, 0), 1000, 0.5, 1)
     };
     private static final Light[] LIGHTS = {
             new AmbientLight(new Color(51, 51, 51)),
