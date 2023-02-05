@@ -29,7 +29,6 @@ public class SceneRenderer {
         for (int y = canvasMin.y; y < canvasMax.y; y++) {
             for (int x = canvasMin.x; x < canvasMax.x; x++) {
                 Point3D viewPort = canvasToViewPort(canvasDimension, x, y);
-                // TODO: transform by camera.rotation
                 Color color = Shape.traceRay(
                         scene,
                         scene.camera().position(),

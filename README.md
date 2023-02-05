@@ -2,7 +2,7 @@
 
 A simple demo of software raytracing.
 
-![Screenshot](docs/Screen%20Shot%202023-02-01%20at%2022.29.12.png)
+![Screenshot](docs/Screen%20Shot%202023-02-05%20at%2021.17.05.png)
 
 ## Features
 
