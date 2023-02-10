@@ -2,6 +2,7 @@ package fi.misaki.raytrace.light;
 
 import fi.misaki.raytrace.render.DistanceRange;
 import fi.misaki.raytrace.render.Point3D;
+import fi.misaki.raytrace.render.Vector3D;
 import fi.misaki.raytrace.scene.Scene;
 import fi.misaki.raytrace.shape.Shape;
 
@@ -9,7 +10,7 @@ import java.awt.*;
 import java.util.Arrays;
 
 public interface Light {
-    static Color compute(Scene scene, Point3D target, Point3D normal, Point3D toViewPort, int specular) {
+    static Color compute(Scene scene, Point3D target, Vector3D normal, Vector3D toViewPort, int specular) {
         return Arrays.stream(scene.lights())
                 .map(light ->
                         switch (light) {
@@ -34,7 +35,7 @@ public interface Light {
                 .reduce(Color.BLACK, Light::mix);
     }
 
-    private static Color getShadowTint(Shape[] shapes, Point3D target, Point3D lightDirection) {
+    private static Color getShadowTint(Shape[] shapes, Point3D target, Vector3D lightDirection) {
         // TODO: calculate shadow color
         if (isIntersectingShape(shapes, target, lightDirection, new DistanceRange(1))) {
             return Color.BLACK;
@@ -42,29 +43,29 @@ public interface Light {
         return new Color(255, 255, 255);
     }
 
-    public static boolean isIntersectingShape(Shape[] shapes, Point3D origin, Point3D direction, DistanceRange range) {
+    public static boolean isIntersectingShape(Shape[] shapes, Point3D origin, Vector3D direction, DistanceRange range) {
         return Arrays.stream(shapes)
                 .anyMatch(shape -> shape.isIntersecting(origin, direction, range));
     }
 
-    static Color getDiffuseIntensity(Color tint, Point3D normal, double angle, Point3D direction) {
+    static Color getDiffuseIntensity(Color tint, Vector3D normal, double angle, Vector3D direction) {
         return angle > 0
                 ? applyLight(tint, angle / (normal.length() * direction.length()))
                 : Color.BLACK;
     }
 
-    static Color getSpecularIntensity(Color tint, Point3D normal, Point3D toViewPort, int specular, Point3D direction) {
+    static Color getSpecularIntensity(Color tint, Vector3D normal, Vector3D toViewPort, int specular, Vector3D direction) {
         if (specular <= 0) {
             return Color.BLACK;
         }
-        Point3D reflectedDirection = getReflectedDirection(normal, direction);
+        Vector3D reflectedDirection = getReflectedDirection(normal, direction);
         double angle = reflectedDirection.dot(toViewPort);
         return angle > 0 ?
                 applyLight(tint, Math.pow(angle / (reflectedDirection.length() * toViewPort.length()), specular))
                 : Color.BLACK;
     }
 
-    static Point3D getReflectedDirection(Point3D normal, Point3D direction) {
+    static Vector3D getReflectedDirection(Vector3D normal, Vector3D direction) {
         return normal.multiply(2).multiply(normal.dot(direction)).minus(direction);
     }
 

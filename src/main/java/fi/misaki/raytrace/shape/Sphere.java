@@ -2,6 +2,7 @@ package fi.misaki.raytrace.shape;
 
 import fi.misaki.raytrace.render.DistanceRange;
 import fi.misaki.raytrace.render.Point3D;
+import fi.misaki.raytrace.render.Vector3D;
 
 import java.awt.*;
 import java.util.Optional;
@@ -21,13 +22,13 @@ public record Sphere(
     }
 
     @Override
-    public Point3D normal(Point3D intersection) {
-        Point3D normal = intersection.minus(center);
+    public Vector3D normal(Point3D intersection) {
+        Vector3D normal = new Vector3D(center, intersection);
         return normal.divide(normal.length());
     }
 
     @Override
-    public Optional<ShapeIntersectionDistance> getClosestIntersection(Point3D origin, Point3D direction, DistanceRange range) {
+    public Optional<ShapeIntersectionDistance> getClosestIntersection(Point3D origin, Vector3D direction, DistanceRange range) {
         ShapeIntersectionDistance result = null;
         double minIntersection = Double.MAX_VALUE;
         double[] intersections = intersectRaySphere(origin, direction);
@@ -40,7 +41,7 @@ public record Sphere(
     }
 
     @Override
-    public boolean isIntersecting(Point3D origin, Point3D direction, DistanceRange range) {
+    public boolean isIntersecting(Point3D origin, Vector3D direction, DistanceRange range) {
         double minIntersection = Double.MAX_VALUE;
         double[] intersections = intersectRaySphere(origin, direction);
         for (double intersection : intersections) {
@@ -51,8 +52,8 @@ public record Sphere(
         return false;
     }
 
-    private double[] intersectRaySphere(Point3D camera, Point3D viewPort) {
-        Point3D co = camera.minus(center);
+    private double[] intersectRaySphere(Point3D camera, Vector3D viewPort) {
+        Vector3D co = new Vector3D(center, camera);
 
         double a = viewPort.dot(viewPort);
         double b = 2 * co.dot(viewPort);

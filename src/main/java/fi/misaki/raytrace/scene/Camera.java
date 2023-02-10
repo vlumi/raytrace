@@ -2,6 +2,7 @@ package fi.misaki.raytrace.scene;
 
 import fi.misaki.raytrace.render.Point3D;
 import fi.misaki.raytrace.render.RotationMatrix;
+import fi.misaki.raytrace.render.Vector3D;
 
 public record Camera(
         Point3D position,
@@ -23,17 +24,17 @@ public record Camera(
         double cosZ = Math.cos(rotationRad.z());
 
         return new RotationMatrix(
-                new Point3D(
+                new Vector3D(
                         cosY * cosZ,
                         sinX * sinY * cosZ - cosX * sinZ,
                         cosX * sinY * cosZ + sinX * sinZ
                 ),
-                new Point3D(
+                new Vector3D(
                         cosY * sinZ,
                         sinX * sinY * sinZ + cosX * cosZ,
                         cosX * sinY * sinZ - sinX * cosZ
                 ),
-                new Point3D(
+                new Vector3D(
                         -sinY,
                         sinX * cosY,
                         cosX * cosY

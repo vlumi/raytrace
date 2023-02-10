@@ -28,7 +28,7 @@ public class SceneRenderer {
 
         for (int y = canvasMin.y; y < canvasMax.y; y++) {
             for (int x = canvasMin.x; x < canvasMax.x; x++) {
-                Point3D viewPort = canvasToViewPort(canvasDimension, x, y);
+                Vector3D viewPort = canvasToViewPort(canvasDimension, x, y);
                 Color color = Shape.traceRay(
                         scene,
                         scene.camera().position(),
@@ -45,9 +45,9 @@ public class SceneRenderer {
         return image;
     }
 
-    private Point3D canvasToViewPort(Dimension canvasDimension, double x, double y) {
+    private Vector3D canvasToViewPort(Dimension canvasDimension, double x, double y) {
         DoubleDimension viewportDimension = new DoubleDimension(scene.fovScale(), scene.fovScale() * canvasDimension.height / canvasDimension.width);
-        return new Point3D(
+        return new Vector3D(
                 x * viewportDimension.width() / canvasDimension.width,
                 y * viewportDimension.height() / canvasDimension.height,
                 scene.projectionPlaneDistance()

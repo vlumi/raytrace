@@ -6,6 +6,7 @@ import fi.misaki.raytrace.light.Light;
 import fi.misaki.raytrace.light.PointLight;
 import fi.misaki.raytrace.render.Point3D;
 import fi.misaki.raytrace.render.SceneRenderer;
+import fi.misaki.raytrace.render.Vector3D;
 import fi.misaki.raytrace.scene.Camera;
 import fi.misaki.raytrace.scene.Scene;
 import fi.misaki.raytrace.shape.Shape;
@@ -32,7 +33,7 @@ public class Main extends JPanel implements ComponentListener {
     private static final Light[] LIGHTS = {
             new AmbientLight(new Color(51, 51, 51)),
             new PointLight(new Color(153, 153, 153), new Point3D(2, 1, 0)),
-            new DirectionalLight(new Color(51, 51, 51), new Point3D(1, 4, 4))
+            new DirectionalLight(new Color(51, 51, 51), new Vector3D(1, 4, 4))
     };
     private static final double PROJECTION_PLANE_DISTANCE = 1;
     private static final int DEFAULT_CANVAS_WIDTH = 800;

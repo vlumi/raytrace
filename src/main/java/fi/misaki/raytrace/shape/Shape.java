@@ -3,6 +3,7 @@ package fi.misaki.raytrace.shape;
 import fi.misaki.raytrace.light.Light;
 import fi.misaki.raytrace.render.DistanceRange;
 import fi.misaki.raytrace.render.Point3D;
+import fi.misaki.raytrace.render.Vector3D;
 import fi.misaki.raytrace.scene.Scene;
 
 import java.awt.*;
@@ -14,7 +15,7 @@ public interface Shape {
     static Color traceRay(
             Scene scene,
             Point3D origin,
-            Point3D viewPort,
+            Vector3D viewPort,
             DistanceRange range,
             int iteration
     ) {
@@ -35,7 +36,7 @@ public interface Shape {
     private static ShapeIntersectionDistance getClosestIntersection(
             Shape[] shapes,
             Point3D origin,
-            Point3D direction,
+            Vector3D direction,
             DistanceRange range
     ) {
         return Arrays.stream(shapes)
@@ -51,12 +52,12 @@ public interface Shape {
             Scene scene,
             Shape shape,
             Point3D camera,
-            Point3D viewPort,
+            Vector3D viewPort,
             double shapeIntersection,
             int iteration
     ) {
         Point3D intersection = camera.plus(viewPort.multiply(shapeIntersection));
-        Point3D normal = shape.normal(intersection);
+        Vector3D normal = shape.normal(intersection);
         Color tint = Light.compute(
                 scene,
                 intersection,
@@ -93,8 +94,8 @@ public interface Shape {
             Scene scene,
             Shape shape,
             Point3D intersection,
-            Point3D normal,
-            Point3D viewPort,
+            Vector3D normal,
+            Vector3D viewPort,
             Color localColor,
             int iteration
     ) {
@@ -103,14 +104,14 @@ public interface Shape {
         }
 
         // TODO: refraction at entry
-        Point3D entryDirection = viewPort;
+        Vector3D entryDirection = viewPort;
         return shape.getClosestIntersection(intersection, entryDirection, new DistanceRange())
                 .map(exitIntersectionDistance -> {
                     double distance = exitIntersectionDistance.distance();
                     Point3D exitIntersection = intersection.plus(entryDirection.multiply(distance));
                     double adjustedOpacity = shape.opacity() * distance / shape.nominalDiameter();
                     // TODO: refraction at exitIntersectionDistance
-                    Point3D exitDirection = entryDirection;
+                    Vector3D exitDirection = entryDirection;
                     Color translucentColor = traceRay(
                             scene,
                             exitIntersection,
@@ -129,8 +130,8 @@ public interface Shape {
     private static Color mixReflectedColor(
             Scene scene,
             Point3D intersection,
-            Point3D normal,
-            Point3D viewPort,
+            Vector3D normal,
+            Vector3D viewPort,
             Color localColor,
             double reflective,
             int iteration
@@ -139,7 +140,7 @@ public interface Shape {
             return localColor;
         }
 
-        Point3D reflection = Light.getReflectedDirection(normal, viewPort.negate());
+        Vector3D reflection = Light.getReflectedDirection(normal, viewPort.negate());
         Color reflectedColor = traceRay(
                 scene,
                 intersection,
@@ -164,9 +165,9 @@ public interface Shape {
 
     double nominalDiameter();
 
-    Point3D normal(Point3D intersection);
+    Vector3D normal(Point3D intersection);
 
-    Optional<ShapeIntersectionDistance> getClosestIntersection(Point3D origin, Point3D direction, DistanceRange range);
+    Optional<ShapeIntersectionDistance> getClosestIntersection(Point3D origin, Vector3D direction, DistanceRange range);
 
-    boolean isIntersecting(Point3D origin, Point3D direction, DistanceRange range);
+    boolean isIntersecting(Point3D origin, Vector3D direction, DistanceRange range);
 }

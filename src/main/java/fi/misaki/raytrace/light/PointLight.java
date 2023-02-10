@@ -1,6 +1,7 @@
 package fi.misaki.raytrace.light;
 
 import fi.misaki.raytrace.render.Point3D;
+import fi.misaki.raytrace.render.Vector3D;
 
 import java.awt.*;
 import java.util.function.Function;
@@ -15,13 +16,13 @@ public class PointLight implements Light {
     }
 
     public Color getTint(
-            Function<Point3D, Color> getShadowTint,
+            Function<Vector3D, Color> getShadowTint,
             Point3D target,
-            Point3D normal,
-            Point3D toViewPort,
+            Vector3D normal,
+            Vector3D toViewPort,
             int specular
     ) {
-        Point3D direction = position.minus(target);
+        Vector3D direction = new Vector3D(target, position);;
         Color shadedTint = Light.applyLight(tint, getShadowTint.apply(direction));
         double angle = normal.dot(direction);
         return Light.mix(
